@@ -4,6 +4,10 @@ A skill that lets **Claude Code** talk to a **Codex** thread by its thread id: s
 existing Codex session and get the reply, read its conversation, and **listen** to the thread live.
 Pure Python 3.8+ standard library; Windows, macOS, Linux.
 
+[![Watch the demo on YouTube: Claude Code talks to Codex](https://img.youtube.com/vi/W3lJTrcBMj0/maxresdefault.jpg)](https://www.youtube.com/watch?v=W3lJTrcBMj0)
+
+**Watch the demo (about 4 minutes):** [I Made Claude Code Talk to Codex (Free Plugin)](https://www.youtube.com/watch?v=W3lJTrcBMj0). It shows why I connect the two agents and the full setup, with the setup starting at 1:04.
+
 **Direction: Claude Code -> Codex.** Install it on the Claude Code side only; Codex needs nothing.
 Codex -> Claude Code is not supported (see the end).
 
