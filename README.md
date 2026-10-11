@@ -28,6 +28,20 @@ Then:
 4. Tell Claude Code in plain words, e.g. *"talk to codex thread 01a1…, ask it to summarise its last turn"*
    or *"listen to codex thread 01a1… and tell me when it finishes"*. The skill does the rest.
 
+## Install from the Claude plugin marketplace (no script)
+
+In Claude Code (terminal or the Claude desktop app's Code tab), run:
+
+```
+/plugin marketplace add DoctrNikhil/claude-codex-bridge
+/plugin install agent-bridge@claude-codex-bridge
+```
+
+On Claude Code 2.1.275 or later one step also works: `/plugin install agent-bridge --marketplace DoctrNikhil/claude-codex-bridge`.
+Then start a new session. Update later with `/plugin marketplace update claude-codex-bridge`. The same two
+commands work in a terminal as `claude plugin marketplace add ...` and `claude plugin install ...`.
+Marketplace installs get the skill; to run the prerequisite check, use the skill's `scripts/bridge.py doctor --peer codex`.
+
 ## Prerequisites at a glance
 
 | Need | Check / fix |
