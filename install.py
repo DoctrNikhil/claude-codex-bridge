@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the agent-bridge skill for Claude Code (it talks to Codex; Codex needs nothing installed).
+"""Install agent-bridge for Claude Code (Codex and Antigravity need no extra skill).
 
     python3 install.py                 # install for Claude Code (default)
     python3 install.py --uninstall     # remove it again
@@ -28,9 +28,11 @@ Next steps
   1. Start a NEW Claude Code session (restart or /clear) so it loads the skill.
   2. Get the Codex thread id: ask Codex "what is your thread id?", or run
        bridge.py threads --peer codex --limit 3
+     For Antigravity, run bridge.py threads --peer antigravity, or use --thread new.
   3. Smoke test:
        bridge.py send --peer codex --thread <CODEX_ID> "Reply with the single word PONG. No tools."
      Or just tell Claude Code: "talk to codex thread <id>" and it will use the skill.
+     Antigravity: bridge.py send --peer antigravity --thread new "Reply with the single word PONG."
   Codex may ask its own user to approve requests that change files; that is expected."""
 
 
@@ -77,10 +79,10 @@ def main():
         return
     if not a.no_check:
         bridge = done[0][1] / "scripts" / "bridge.py"
-        print("\nPrerequisite check for Claude Code -> Codex (doctor --peer codex):")
-        r = subprocess.run([sys.executable, str(bridge), "doctor", "--peer", "codex"],
-                           stdout=subprocess.DEVNULL)
-        print(f"    => {'READY' if r.returncode == 0 else 'NOT READY (see FAIL lines above)'}")
+        for peer in ("codex", "antigravity"):
+            print(f"\nPrerequisite check (doctor --peer {peer}); only your chosen peer needs to be ready:", flush=True)
+            r = subprocess.run([sys.executable, "-B", str(bridge), "doctor", "--peer", peer])
+            print(f"    => {'READY' if r.returncode == 0 else 'NOT READY (see check output above)'}")
     print(NEXT_STEPS)
 
 

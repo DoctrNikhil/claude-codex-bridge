@@ -1,12 +1,12 @@
 {
   "name": "claude-codex-bridge",
-  "description": "Skill that lets Claude Code talk to a Codex thread",
+  "description": "Skill that lets Claude Code talk to Codex and Antigravity conversations",
   "owner": { "name": "Nikhil Kumar" },
   "plugins": [
     {
       "name": "agent-bridge",
       "source": "./",
-      "description": "Send messages to, read from, and listen to an existing Codex thread from Claude Code. Needs only Python 3.8+."
+      "description": "Send messages to, read from, and listen to Codex and local Antigravity conversations from Claude Code. Needs only Python 3.8+."
     }
   ]
 }

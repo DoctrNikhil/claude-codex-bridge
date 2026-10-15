@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""agent-bridge: let Claude Code message, read and listen to a Codex thread.
+"""agent-bridge: let Claude Code message, read and listen to Codex or Antigravity.
 
-Supported direction: Claude Code -> Codex (--peer codex). The --peer claude / inbox paths exist but
+Supported peers: --peer codex and --peer antigravity. The --peer claude / inbox paths exist but
 are experimental and unsupported (Codex's sandbox blocks them; see references/).
 
 Pure Python 3.8+ standard library. Works on Windows, macOS and Linux.
@@ -15,6 +15,7 @@ Pure Python 3.8+ standard library. Works on Windows, macOS and Linux.
 
 --peer names the agent you are TALKING TO:
     codex   -> sessions in $CODEX_HOME/sessions        (default ~/.codex)
+    antigravity -> local Electron chat UI + read-only SQLite conversations
     claude  -> sessions in $CLAUDE_CONFIG_DIR/projects (default ~/.claude)
 
 --thread accepts a full id, a unique id prefix, or "latest".
@@ -631,8 +632,13 @@ def main():
 
     def common(name, thread=True, **kw):
         p = sub.add_parser(name, **kw)
-        p.add_argument("--peer", choices=["codex", "claude"], required=True,
+        p.add_argument("--peer", choices=["codex", "claude"] if name == "inbox" else ["codex", "antigravity", "claude"], required=True,
                        help="the agent you are talking to")
+        if name != "inbox":
+            p.add_argument("--data-dir", type=Path, help="antigravity: conversation database directory")
+            p.add_argument("--profile-dir", type=Path, help="antigravity: app profile containing DevToolsActivePort")
+            p.add_argument("--port", type=int, help="antigravity: explicit localhost debugging port")
+            p.add_argument("--target", help="antigravity: CDP page ID when multiple windows are open")
         if thread:
             p.add_argument("--thread", required=True, help="session id, unique prefix, or 'latest'")
         return p
@@ -644,6 +650,8 @@ def main():
     p = common("read"); p.add_argument("--last", type=int, default=10)
     p.add_argument("--all", action="store_true", help="include commentary, not just final answers")
     p.add_argument("--max-chars", type=int, default=0, help="truncate each message (0 = no limit)")
+    p.add_argument("--after", type=int, help="antigravity: only step indices after this cursor")
+    p.add_argument("--only", choices=["user", "assistant"], help="antigravity: filter by role")
     p.set_defaults(f=cmd_read)
     p = common("send"); p.add_argument("message", help="text, or '-' to read stdin")
     p.add_argument("--timeout", type=int, default=600)
@@ -652,7 +660,9 @@ def main():
                    help="codex: 'queue' (works while the Codex app has the thread open), 'exec' "
                         "(codex exec resume, idle threads only). claude: 'print' (claude -p --resume, "
                         "needs a logged-in claude CLI), 'inbox' (mailbox file). auto = best available")
-    p.add_argument("--no-wait", action="store_true", help="codex queue only: return without waiting for the reply")
+    waiting = p.add_mutually_exclusive_group()
+    waiting.add_argument("--no-wait", action="store_true", help="codex queue or antigravity: return after delivery")
+    waiting.add_argument("--wait", action="store_true", help="wait for the reply (the default)")
     p.add_argument("--interval", type=float, default=1.0)
     p.add_argument("--extra", nargs=argparse.REMAINDER, default=[],
                    help="extra args passed to the peer CLI (must be last), e.g. --extra --permission-mode acceptEdits")
@@ -665,6 +675,7 @@ def main():
     p.add_argument("--timeout", type=int, default=0, help="seconds, 0 = forever")
     p.add_argument("--interval", type=float, default=1.0)
     p.add_argument("--max-chars", type=int, default=4000, help="truncate each message (0 = no limit)")
+    p.add_argument("--after", type=int, help="antigravity: replay updates after this step index")
     p.set_defaults(f=cmd_listen)
 
     p = common("inbox")
@@ -677,6 +688,9 @@ def main():
 
     a = ap.parse_args()
     try:
+        if a.peer == "antigravity":
+            import antigravity
+            sys.exit(antigravity.dispatch(a))
         a.f(a)
     except KeyboardInterrupt:
         pass
