@@ -2,6 +2,7 @@
 import argparse
 from contextlib import closing, redirect_stdout
 import io
+import itertools
 import json
 import pathlib
 import sqlite3
@@ -134,6 +135,19 @@ class BridgeTests(unittest.TestCase):
         for endpoint in ("ws://example.com/devtools/page/test", "file:///tmp/test", "ws://user@localhost/test"):
             with self.subTest(endpoint=endpoint), self.assertRaises(bridge.BridgeError):
                 local_url(endpoint)
+
+    def test_return_path_replays_cursor_and_finishes_without_ui_or_cli(self):
+        args = self.args(after=0, from_start=False, only="assistant", until_reply=True,
+                         timeout=5, poll=0.01, include_bridge=False)
+        out = io.StringIO()
+        with patch.object(bridge, "App") as app, \
+             patch.object(bridge.time, "monotonic", side_effect=itertools.count(0, 0.2)), \
+             patch.object(bridge.time, "sleep"), redirect_stdout(out):
+            bridge.listen(args, self.store)
+        events = [json.loads(line) for line in out.getvalue().splitlines()]
+        self.assertEqual([e["event"] for e in events], ["listening", "message", "turn_complete"])
+        self.assertEqual((events[1]["text"], events[2]["index"]), ("PONG", 3))
+        app.assert_not_called()
 
 
 if __name__ == "__main__":

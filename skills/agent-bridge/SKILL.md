@@ -70,6 +70,11 @@ reads `auth.json` or other credentials. Overrides if auto-discovery fails: `CODE
 
 The same commands support `--peer antigravity`. Its send waits by default, and
 `--no-wait` returns after delivery. `--thread new` creates an Antigravity chat.
+For a two-way conversation, follow the bounded
+[converse pattern](references/antigravity.md#bounded-two-way-conversation):
+send, receive the peer's question through SQLite listen, compose an authorized
+answer, and send it back. Stop after at most three outgoing turns. Claude
+must be running the controller/listener; this does not start Claude turns by itself.
 
 ```
 bridge.py doctor  --peer codex [--thread ID]

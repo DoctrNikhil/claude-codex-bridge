@@ -1,7 +1,7 @@
 {
   "name": "agent-bridge",
   "description": "Let Claude Code message, read and listen to Codex or local Antigravity conversations.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": { "name": "Nikhil Kumar" },
   "homepage": "https://github.com/DoctrNikhil/claude-codex-bridge",
   "repository": "https://github.com/DoctrNikhil/claude-codex-bridge",
